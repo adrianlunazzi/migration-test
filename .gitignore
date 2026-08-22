@@ -44,3 +44,6 @@ next-env.d.ts
 .claude
 skills-lock.json
 /src/generated/prisma
+
+# plan de trabajo local
+PLAN.MD
