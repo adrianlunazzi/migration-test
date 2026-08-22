@@ -34,6 +34,7 @@ model User {
   passwordHash String
   name         String
   role         Role     @default(ADMIN)
+  tokenVersion Int      @default(0) // bump para invalidar todos los JWT activos (revocación)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

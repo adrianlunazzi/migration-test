@@ -47,3 +47,6 @@ skills-lock.json
 
 # plan de trabajo local
 PLAN.MD
+
+# seed local
+/src/prisma/seed.ts
