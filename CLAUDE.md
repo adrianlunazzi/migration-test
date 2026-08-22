@@ -6,6 +6,8 @@ Next.js (App Router) + Prisma + Neon Postgres + Tailwind + shadcn/ui + Cloudinar
 
 Package manager: **pnpm** (nunca npm/yarn) para instalar/agregar dependencias.
 
+UI: **mobile first** siempre — clases base de Tailwind para mobile, `sm:`/`md:`/`lg:` para escalar hacia arriba.
+
 Reglas y detalle completos en skill `nextjs-vsa-project` (`.claude/skills/nextjs-vsa-project/`). Para ahorrar tokens, no cargar el skill completo salvo necesidad real — ir directo al archivo puntual:
 - Nueva feature / estructura de carpetas → `SKILL.md`
 - Seguridad (XSS, injection, IDOR, CSRF, SSRF, uploads, path traversal, etc.) → `references/security-checklist.md`

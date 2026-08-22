@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -10,4 +8,133 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+}
+
+enum ShippingMethod {
+  PICKUP
+  DELIVERY
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  PREPARING
+  READY // listo para retirar / despachado
+  COMPLETED // retirado / entregado
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(ADMIN)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  position    Int       @default(0)
+  active      Boolean   @default(true)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id          String         @id @default(cuid())
+  name        String
+  slug        String         @unique
+  description String
+  categoryId  String
+  category    Category       @relation(fields: [categoryId], references: [id])
+  active      Boolean        @default(true)
+  featured    Boolean        @default(false)
+  variants    Variant[]
+  images      ProductImage[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Variant {
+  id         String         @id @default(cuid())
+  productId  String
+  product    Product        @relation(fields: [productId], references: [id])
+  sku        String         @unique
+  price      Decimal        @db.Decimal(10, 2)
+  stock      Int            @default(0)
+  color      String?
+  material   String?
+  size       String? // tamaño/capacidad
+  virola     String?
+  base       String?
+  images     ProductImage[]
+  orderItems OrderItem[]
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  variantId String?
+  variant   Variant? @relation(fields: [variantId], references: [id])
+  url       String
+  publicId  String // Cloudinary public_id, para poder borrar/reemplazar
+  alt       String
+  isPrimary Boolean  @default(false) // imagen principal (thumbnail en listado/card). Solo una por producto.
+  position  Int      @default(0) // orden dentro de la galería
+}
+
+model Order {
+  id     String      @id @default(cuid()) // también actúa como token de tracking
+  status OrderStatus @default(PENDING_PAYMENT)
+
+  buyerName  String
+  buyerEmail String
+  buyerPhone String
+
+  shippingMethod       ShippingMethod
+  shippingCost         Decimal        @default(0) @db.Decimal(10, 2)
+  shippingAddress      String?
+  shippingCity         String?
+  shippingProvince     String?
+  shippingPostalCode   String?
+  andreaniTrackingCode String?
+
+  mpPreferenceId String?
+  mpPaymentId    String?
+  mpStatus       String?
+
+  items OrderItem[]
+
+  total     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([buyerEmail])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  variantId String
+  variant   Variant @relation(fields: [variantId], references: [id])
+
+  // snapshot al momento de compra
+  productName  String
+  variantLabel String // ej: "Negro / Calabaza / Chico"
+  unitPrice    Decimal @db.Decimal(10, 2)
+  quantity     Int
 }
